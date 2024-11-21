@@ -95,13 +95,15 @@ class StripeController {
                 success_url: `${process.env.FRONTEND_URL}/register/subscription-needs`,
                 cancel_url: `${process.env.FRONTEND_URL}/register/choose-plan`,
             });
+console.log("============================================");
+            console.log(session);
 
             await user.update({ plan: planName });
 
             await Subscription.create({
                 user_id: user.id,
                 product_id: planId,  // Assuming product_id corresponds to the plan ID
-                stripe_subscription_id: session.subscription, // The subscription ID returned by Stripe
+                stripe_subscription_id: session.customer, // The subscription ID returned by Stripe
                 status: 'active',
                 start_date: new Date(), // Set the start date of the subscription
                 end_date: this.calculateEndDate(planName), // Assuming you have a function to calculate the subscription end date

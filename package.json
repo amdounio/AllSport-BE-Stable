@@ -1,0 +1,45 @@
+{
+  "name": "allsports-be",
+  "version": "1.0.0",
+  "description": "AllSports Saas Back-End",
+  "main": "index.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "start": "node server.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/amdounio/AllSports-BE.git"
+  },
+  "author": "Mohamed Amine Amdouni",
+  "license": "ISC",
+  "bugs": {
+    "url": "https://github.com/amdounio/AllSports-BE/issues"
+  },
+  "homepage": "https://github.com/amdounio/AllSports-BE#readme",
+  "dependencies": {
+    "axios": "^1.7.7",
+    "bcrypt": "^5.1.1",
+    "bcryptjs": "^2.4.3",
+    "canvas": "^2.11.2",
+    "cors": "^2.8.5",
+    "cryptr": "^6.3.0",
+    "date-fns": "^4.1.0",
+    "dotenv": "^16.4.5",
+    "express": "^4.21.1",
+    "flatted": "^3.3.1",
+    "fs": "^0.0.1-security",
+    "google-auth-library": "^9.14.2",
+    "jsonwebtoken": "^9.0.2",
+    "multer": "^1.4.5-lts.1",
+    "mysql2": "^3.11.3",
+    "nodemailer": "^6.9.15",
+    "passport": "^0.7.0",
+    "passport-google-oauth20": "^2.0.0",
+    "path": "^0.12.7",
+    "sequelize": "^6.37.4",
+    "sharp": "^0.33.5",
+    "stripe": "^17.2.1"
+  },
+  "keywords": []
+}
