@@ -5,7 +5,7 @@ const { format, parse, addHours,isValid } = require('date-fns');
 const { fr } = require('date-fns/locale');
 const path = require('path');
 const imagesDirectory = path.join(__dirname, '../public/images'); // Directory for saving images
-const { Match } = require("../config/relation");
+const { User,Match } = require("../config/relation");
 const flatted = require('flatted');
 
 async function fetchImageBuffer(url) {
@@ -23,11 +23,11 @@ const generateImageController = async (req, res) => {
 
 
 
-        const { background, typography } = req.body;
+        const { background, typography } = req.body.match;
 
         // Get background image URL
-        const backgroundUrl = background?.image || "https://allsports-front.2points.fr/payloads/background.png";  // Use default if no background provided
-        const fontFamily = typography?.name || "Arial"; // Use the default font if none provided
+        const backgroundUrl = background || "https://allsports-front.2points.fr/payloads/background.png";  // Use default if no background provided
+        const fontFamily = typography || "Arial"; // Use the default font if none provided
 
 
         const {
@@ -201,11 +201,11 @@ const generateSquareImage = async (req, res) => {
        watermarkUrl = "https://allsports-front.2points.fr/payloads/low_logo_watermark.png"
         const { match } = req.body;
 
-        const { background, typography } = req.body;
+        const { background, typography } = req.body.match;
 
         // Get background image URL
-        const backgroundUrl = background?.image || "https://allsports-front.2points.fr/payloads/background.png";  // Use default if no background provided
-        const fontFamily = typography?.name || "Arial"; // Use the default font if none provided
+        const backgroundUrl = background || "https://allsports-front.2points.fr/payloads/background.png";  // Use default if no background provided
+        const fontFamily = typography || "Arial"; // Use the default font if none provided
 
 
 
@@ -416,8 +416,15 @@ const verticalImageUrl = await generateImageController(req, res, false);
 const squareImageUrl = await generateSquareImage(req, res, true);
 const currentDate = new Date();
 
+const { userId } = req.body; // Get userId from request
 
-
+if (userId) {
+    const user = await User.findByPk(userId);
+    if (user) {
+        await user.increment('generatedImagesCount');
+        await user.save();
+    }
+}   
 
 // 
 const CompositeImage = await createCompositeImage(verticalImageUrl.imageBuffer,squareImageUrl.imageBuffer,req,res)
@@ -442,11 +449,12 @@ res.json({
 
 const saveMatchData = async (req, res) => {
     try {
-        const safeData = flatted.stringify(req.body);
+        const safeData = flatted.stringify(req.body.matches)
+        const userid = req.body.userId;
 
         const match = await Match.create({
             data: safeData, // The full match data as a JSON object
-            user_id: 1, // The full match data as a JSON object
+            user_id: userid, // The full match data as a JSON object
 
         });
         console.log('Match saved successfully with ID:', match.id);

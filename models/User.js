@@ -119,19 +119,26 @@ module.exports = (db, type) => {
             allowNull: true,
         },
 
+        // Generated images counter
+        generatedImagesCount: {
+            type: type.INTEGER,
+            defaultValue: 0,
+            allowNull: false,
+        },
+
         // Existing fields to retain
         password: {
             type: type.STRING,
-            allowNull: true, // Can be null for SSO users
+            allowNull: true,
         },
         ssoData: {
-            type: type.JSON, // Store SSO info
+            type: type.JSON,
             allowNull: true,
         },
         stripeCustomerId: {
             type: type.STRING,
             allowNull: true,
-            unique: true, // Ensure the Stripe customer ID is unique
+            unique: true,
         },
         createdAt: {
             type: type.DATE,
@@ -144,6 +151,6 @@ module.exports = (db, type) => {
     }, {
         tableName: 'users',
         timestamps: true,
-        engine: 'InnoDB', // Optionally define InnoDB engine
+        engine: 'InnoDB',
     });
 };

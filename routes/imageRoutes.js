@@ -6,9 +6,19 @@ const {generateImageController,generateSquareImage,generateBothImages,saveMatchD
 const router = express.Router();
 
 // Set up multer for file uploads
-const upload = multer({
-  dest: path.join(__dirname, '../uploads'),
+
+
+// Set up multer for file uploads
+const storage = multer.diskStorage({
+  destination: (req, file, cb) => {
+      cb(null, path.join(__dirname, '../uploads'));
+  },
+  filename: (req, file, cb) => {
+      cb(null, Date.now() + '-' + file.originalname);
+  }
 });
+
+const upload = multer({ storage: storage });
 
 // Define the route for image generation
 router.post('/generate-image', generateImageController);

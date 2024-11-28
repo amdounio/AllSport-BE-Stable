@@ -1,5 +1,10 @@
 const {User} = require('../config/relation');
 const nodemailer = require('nodemailer'); 
+
+
+const bcrypt = require('bcryptjs');
+const fs = require('fs');
+const path = require('path');
 // Create a new user
 const createUser = async (req, res) => {
     const { username, email, password, ssoData } = req.body; // Add ssoData to the destructured fields
@@ -16,6 +21,36 @@ const createUser = async (req, res) => {
     }
 };
 
+const getUserById = async (req, res) => {
+    try {
+        const userId = req.params.id;
+        const user = await User.findByPk(userId, {
+            attributes: { 
+                exclude: ['password', 'stripeCustomerId'] // Exclude sensitive data
+            }
+        });
+
+        if (!user) {
+            return res.status(404).json({ 
+                status: 'error',
+                message: 'User not found' 
+            });
+        }
+
+        res.status(200).json({
+            status: 'success',
+            user
+        });
+    } catch (error) {
+        console.error('Error fetching user:', error);
+        res.status(500).json({ 
+            status: 'error',
+            message: 'Error fetching user information'
+        });
+    }
+};
+
+
 // Get all users
 const getUsers = async (req, res) => {
     try {
@@ -26,6 +61,26 @@ const getUsers = async (req, res) => {
     }
 };
 
+const getGeneratedImagesCount = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findByPk(userId);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({
+            userId: user.id,
+            generatedImagesCount: user.generatedImagesCount,
+            status: 'success'
+        });
+    } catch (error) {
+        console.error('Error fetching generated images count:', error);
+        res.status(500).json({ error: 'Error fetching generated images count' });
+    }
+};
 
 const forgotPassword = async (req, res) => {
   const { email } = req.body;
@@ -112,7 +167,6 @@ const editUserInfo = async (req, res) => {
         name,
         firstName,
         lastName,
-        photoUrl,
         provider,
         acceptLegalPolicy,
         
@@ -146,7 +200,12 @@ const editUserInfo = async (req, res) => {
         ssoData,
     } = req.body;
 
+    const logo = req.file ? req.file.filename : null;
+    const photoUrl = `/public/profile-photos/${req.file.filename}`;
+
     try {
+
+     
         const user = await User.findOne({ where: { id } }); // Find user by `id`
         if (!user) {
             return res.status(404).json({ error: 'User not found' });
@@ -202,8 +261,70 @@ const editUserInfo = async (req, res) => {
     }
 };
 
+const getCurrentSubscription = async (req, res) => {
+    const { userId } = req.params;
+
+    try {
+        const user = await User.findByPk(userId);
+        
+        if (!user) {
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        res.status(200).json({
+            userId: user.id,
+            currentPlan: user.plan || 'Free', // Default to 'Free' if no plan is set
+            status: 'success'
+        });
+    } catch (error) {
+        console.error('Error fetching current subscription:', error);
+        res.status(500).json({ error: 'Error fetching subscription information' });
+    }
+};
 
 
 
 
-module.exports = { createUser, getUsers, forgotPassword, editPassword, editUserInfo };
+
+const updateUserPhoto = async (req, res) => {
+    try {
+        if (!req.file) {
+            return res.status(400).json({ error: 'No file uploaded' });
+        }
+
+        const { userId } = req.body;
+        const user = await User.findByPk(userId);
+
+        if (!user) {
+            fs.unlinkSync(req.file.path);
+            return res.status(404).json({ error: 'User not found' });
+        }
+
+        if (user.photoUrl) {
+            const oldPhotoPath = path.join(__dirname, '..', user.photoUrl);
+            if (fs.existsSync(oldPhotoPath)) {
+                fs.unlinkSync(oldPhotoPath);
+            }
+        }
+
+        const photoUrl = `/public/profile-photos/${req.file.filename}`;
+        user.photoUrl = photoUrl;
+        await user.save();
+
+        res.status(200).json({
+            message: 'Photo uploaded successfully',
+            photoUrl: photoUrl,
+            user :user,
+            status: 'success'
+        });
+
+    } catch (error) {
+        console.error('Error uploading photo:', error);
+        if (req.file) {
+            fs.unlinkSync(req.file.path);
+        }
+        res.status(500).json({ error: 'Error uploading photo' });
+    }
+};
+
+module.exports = { updateUserPhoto,getUserById,createUser, getUsers, forgotPassword, editPassword, editUserInfo ,getGeneratedImagesCount,getCurrentSubscription};

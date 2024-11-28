@@ -14,6 +14,7 @@ const mediathequesRoutes = require('./routes/MediathequesRoutes');
 
 const stripeRoutes = require('./routes/stripeRoutes');
 const stripeWebhook = require('./routes/stripeWebhook');  // adjust the path based on where stripeWebhook.js is located
+const paymentMethodRoutes = require('./routes/paymentMethodRoutes');
 
 
 const app = express();
@@ -40,10 +41,38 @@ app.use('/api/subscriptions', stripeRoutes); // Use your subscription routes
 app.use('/api/stripe', stripeWebhook); // Mount your webhook route under '/api/stripe'
 app.use('/public', express.static(path.join(__dirname, 'public')));
 app.use('/public/ligues/images', express.static(path.join(__dirname, 'public', 'ligues', 'images')));
+app.use('/public/profile-photos', express.static(path.join(__dirname, 'public', 'profile-photos')));
 
 app.use('/api/generator', imageRoutes);
 
 
+app.use('/api/payment', paymentMethodRoutes);
+
+/*
+
+The API endpoints remain the same but are now more robust and secure:
+
+POST /api/payment/payment-methods
+
+Adds a new payment method for a user
+Automatically sets as default if it's the first one
+DELETE /api/payment/payment-methods/:paymentMethodId
+
+Removes a payment method
+Verifies ownership before deletion
+POST /api/payment/payment-methods/:paymentMethodId/default
+
+Sets a payment method as default
+Verifies ownership before updating
+GET /api/payment/payment-methods
+
+Lists all payment methods for a user
+Includes card details and default status
+
+
+
+
+*/
 
 app.use('/api/mediatheques', mediathequesRoutes); // Use your subscription routes
 

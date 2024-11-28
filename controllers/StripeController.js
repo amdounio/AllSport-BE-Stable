@@ -92,7 +92,7 @@ class StripeController {
                     },
                 ],
                 mode: 'subscription',
-                success_url: `${process.env.FRONTEND_URL}/register/subscription-needs`,
+                success_url: `${process.env.FRONTEND_URL}/payment/success`,
                 cancel_url: `${process.env.FRONTEND_URL}/register/choose-plan`,
             });
 console.log("============================================");
